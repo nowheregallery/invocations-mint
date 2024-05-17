@@ -1,6 +1,6 @@
 {
-  "name": "mint-invocations",
-  "version": "0.0.2",
+  "name": "nwg-mint-invocations",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
   "scripts": {

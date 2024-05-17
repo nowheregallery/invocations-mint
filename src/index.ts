@@ -48,21 +48,11 @@ export function attach({ config, element, onStart, onComplete }: AttachArgs) {
     return;
   }
 
-  async function buy() {
-    const { hash } = await writeContract({
-      address: config.contractAddress,
-      abi: buyABI,
-      functionName: "buy",
-      value: parseEther(buyPriceEth),
-    });
-    return chainUsed.blockExplorers.etherscan.url + "/tx/" + hash;
-  }
-
+  // initialize config
   const { publicClient, webSocketPublicClient } = configureChains(
     [chainUsed],
     [alchemyProvider({ apiKey: config.alchemyKey })],
   );
-
   const wagmiConfig = createConfig({
     autoConnect: true,
     publicClient,
@@ -77,30 +67,39 @@ export function attach({ config, element, onStart, onComplete }: AttachArgs) {
     ],
   });
 
+  // connect to wallet
+  async function connectWallet() {
+    let data: { account: Address } | undefined;
+    if (wagmiConfig.data && wagmiConfig.data.account) {
+      // already connected
+      data = { account: wagmiConfig.data.account };
+    } else {
+      for (const connector of wagmiConfig.connectors) {
+        if (!connector.ready || !connector.isAuthorized) {
+          continue;
+        }
+        data = await connect({ chainId: chainUsed.id, connector });
+        break;
+      }
+    }
+    if (!data) {
+      throw new Error("No connector found");
+    }
+    return data;
+  }
+
+  // attach "buy" to onclick
   element.addEventListener("click", async () => {
     try {
       onStart();
-
-      let data: { account: Address } | undefined;
-
-      if (wagmiConfig.data && wagmiConfig.data.account) {
-        // already connected
-        data = { account: wagmiConfig.data.account };
-      } else {
-        for (const connector of wagmiConfig.connectors) {
-          if (!connector.ready || !connector.isAuthorized) {
-            continue;
-          }
-          data = await connect({ chainId: chainUsed.id, connector });
-          break;
-        }
-      }
-
-      if (!data) {
-        throw new Error("No connector found");
-      }
-
-      let txUrl = await buy();
+      await connectWallet();
+      const { hash } = await writeContract({
+        address: config.contractAddress,
+        abi: buyABI,
+        functionName: "buy",
+        value: parseEther(buyPriceEth),
+      });
+      let txUrl = chainUsed.blockExplorers.etherscan.url + "/tx/" + hash;
       onComplete(txUrl, null);
     } catch (e) {
       onComplete(null, e);

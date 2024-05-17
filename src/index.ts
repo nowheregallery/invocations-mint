@@ -115,6 +115,7 @@ export function attach({ config, element, onStart, onComplete }: AttachArgs) {
     ],
   });
 
+  // @ts-ignore
   element.addEventListener("click", async () => {
     try {
       onStart();

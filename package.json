@@ -1,6 +1,6 @@
 {
   "name": "nwg-mint-invocations",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "source": "src/index.ts",
   "browserslist": "> 0.5%, last 2 versions, not dead",

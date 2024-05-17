@@ -41,7 +41,7 @@ function getChain(chainStr: SupportedChain) {
   }
 }
 
-export function attach({ config, element, onStart, onComplete }: AttachArgs) {
+export function configure({ config, onStart, onComplete }: AttachArgs) {
   const chainUsed = getChain(config.chain);
   if (!chainUsed) {
     console.error(`Invalid chain given in NWG config "${config.chain}"`);
@@ -104,6 +104,9 @@ export function attach({ config, element, onStart, onComplete }: AttachArgs) {
     }
   }
 
-  // attach "buy" to onclick
-  element.addEventListener("click", handleBuy);
+  return {
+    registerBuyButton: (element: HTMLElement) => {
+      element.addEventListener("click", handleBuy);
+    }
+  }
 }

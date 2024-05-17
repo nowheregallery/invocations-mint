@@ -67,7 +67,6 @@ export function attach({ config, element, onStart, onComplete }: AttachArgs) {
     ],
   });
 
-  // connect to wallet
   async function connectWallet() {
     let data: { account: Address } | undefined;
     if (wagmiConfig.data && wagmiConfig.data.account) {
@@ -88,8 +87,7 @@ export function attach({ config, element, onStart, onComplete }: AttachArgs) {
     return data;
   }
 
-  // attach "buy" to onclick
-  element.addEventListener("click", async () => {
+  async function handleBuy() {
     try {
       onStart();
       await connectWallet();
@@ -104,5 +102,8 @@ export function attach({ config, element, onStart, onComplete }: AttachArgs) {
     } catch (e) {
       onComplete(null, e);
     }
-  });
+  }
+
+  // attach "buy" to onclick
+  element.addEventListener("click", handleBuy);
 }

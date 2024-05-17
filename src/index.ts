@@ -17,55 +17,17 @@ const buyPriceEth = "0.15";
 
 type SupportedChain = "sepolia" | "mainnet";
 
-/**
- * Configuration for blockchain interaction.
- */
 type Config = {
-  /**
-   * The blockchain network to interact with.
-   */
   chain: SupportedChain;
-
-  /**
-   * The smart contract address on the specified blockchain network.
-   */
   contractAddress: Address;
-
-  /**
-   * The Alchemy API key used for node services and enhanced API access.
-   */
   alchemyKey: string;
-
-  /**
-   * The WalletConnect project ID used for establishing a connection between wallets and dapps.
-   */
   walletConnectProjectId: string;
 };
 
-/**
- * Arguments for attaching logic to a DOM element.
- */
 type AttachArgs = {
-  /**
-   * Configuration object containing blockchain and connection details.
-   */
   config: Config;
-
-  /**
-   * The HTML element to which the logic will be attached.
-   */
   element: HTMLElement;
-
-  /**
-   * Callback function to be called when the process starts.
-   */
   onStart: () => void;
-
-  /**
-   * Callback function to be called upon completion of the process.
-   * @param result - The result of the completed operation, if successful.
-   * @param error - An error object if an error occurred, otherwise null.
-   */
   onComplete: (result: any, error: any) => void;
 };
 

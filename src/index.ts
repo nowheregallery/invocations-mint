@@ -24,11 +24,13 @@ type Config = {
   walletConnectProjectId: string;
 };
 
-type AttachArgs = {
-  config: Config;
+type StartFunc = () => void;
+type CompleteFunc = (result: any, error: any) => void;
+
+type RegisterArgs = {
   element: HTMLElement;
-  onStart: () => void;
-  onComplete: (result: any, error: any) => void;
+  onStart: StartFunc;
+  onComplete: CompleteFunc;
 };
 
 // we only support sepolia or mainnet
@@ -41,7 +43,7 @@ function getChain(chainStr: SupportedChain) {
   }
 }
 
-export function configure({ config, onStart, onComplete }: AttachArgs) {
+export function configure(config: Config) {
   const chainUsed = getChain(config.chain);
   if (!chainUsed) {
     console.error(`Invalid chain given in NWG config "${config.chain}"`);
@@ -87,26 +89,33 @@ export function configure({ config, onStart, onComplete }: AttachArgs) {
     return data;
   }
 
-  async function handleBuy() {
-    try {
-      onStart();
-      await connectWallet();
-      const { hash } = await writeContract({
-        address: config.contractAddress,
-        abi: buyABI,
-        functionName: "buy",
-        value: parseEther(buyPriceEth),
-      });
-      let txUrl = chainUsed.blockExplorers.etherscan.url + "/tx/" + hash;
-      onComplete(txUrl, null);
-    } catch (e) {
-      onComplete(null, e);
-    }
+  function handleBuy(onStart: StartFunc, onComplete: CompleteFunc) {
+    return async () => {
+      try {
+        onStart();
+        await connectWallet();
+        const { hash } = await writeContract({
+          address: config.contractAddress,
+          abi: buyABI,
+          functionName: "buy",
+          value: parseEther(buyPriceEth),
+        });
+        let txUrl = chainUsed.blockExplorers.etherscan.url + "/tx/" + hash;
+        onComplete(txUrl, null);
+      } catch (e) {
+        onComplete(null, e);
+      }
+    };
   }
 
+  // TODO: vouchers
+  let usedVouchers = {};
+  async function checkVouchersAvailable() {}
+  async function handleVoucherMint() {}
+
   return {
-    registerBuyButton: (element: HTMLElement) => {
-      element.addEventListener("click", handleBuy);
-    }
-  }
+    registerBuyButton: ({ element, onStart, onComplete }: RegisterArgs) => {
+      element.addEventListener("click", handleBuy(onStart, onComplete));
+    },
+  };
 }

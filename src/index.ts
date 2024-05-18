@@ -12,7 +12,11 @@ import { parseAbi, parseEther } from "viem";
 import { mainnet, sepolia } from "viem/chains";
 
 // should these be configurable? maybe if we want to support multiple contracts
-const buyABI = parseAbi(["function buy() payable"]);
+const ABI = parseAbi([
+  "function buy() payable",
+  "event NonceUsed(uint256 indexed nonce)",
+  "function invocationVoucher(uint256, uint256, uint8, bytes32, bytes32) payable"
+]);
 const buyPriceEth = "0.15";
 
 type SupportedChain = "sepolia" | "mainnet";
@@ -96,7 +100,7 @@ export function configure(config: Config) {
         await connectWallet();
         const { hash } = await writeContract({
           address: config.contractAddress,
-          abi: buyABI,
+          abi: ABI,
           functionName: "buy",
           value: parseEther(buyPriceEth),
         });
